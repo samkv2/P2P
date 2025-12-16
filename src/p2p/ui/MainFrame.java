@@ -12,6 +12,7 @@ import java.util.function.Consumer;
 public class MainFrame extends JFrame {
     private final PeerNode peerNode;
     private final String username;
+    private final p2p.storage.HistoryManager historyManager; // New Field
     private final DefaultListModel<String> peerListModel;
     private JList<String> peerList;
     private JPanel chatListPanel; // Replaces JTextArea
@@ -25,6 +26,7 @@ public class MainFrame extends JFrame {
     public MainFrame(PeerNode peerNode, String username) {
         this.peerNode = peerNode;
         this.username = username;
+        this.historyManager = new p2p.storage.HistoryManager(); // Init
         this.peerListModel = new DefaultListModel<>();
 
         // Init Global Chat
@@ -208,6 +210,28 @@ public class MainFrame extends JFrame {
         chatListPanel.add(Box.createVerticalGlue());
 
         List<JPanel> history = chatHistory.getOrDefault(sessionName, new ArrayList<>());
+        
+        // Load from disk if empty and not loaded before
+        if (history.isEmpty()) {
+            java.util.List<String> diskHistory = historyManager.loadHistory(sessionName);
+            for (String entry : diskHistory) {
+                // Format: ME:Msg or PEER:Msg
+                if (entry.contains(":")) {
+                    String[] parts = entry.split(":", 2);
+                    String sender = parts[0].equals("ME") ? "Me" : sessionName;
+                    boolean isMe = parts[0].equals("ME");
+                    String msg = parts[1];
+                    // Handle system messages if any (optional extension)
+                    
+                    JPanel bubble = new ChatBubblePanel(sender, msg, isMe);
+                    history.add(bubble);
+                }
+            }
+            if (!history.isEmpty()) {
+                chatHistory.put(sessionName, history);
+            }
+        }
+
         for (JPanel bubble : history) {
             chatListPanel.add(bubble);
         }
@@ -239,6 +263,7 @@ public class MainFrame extends JFrame {
         } else {
             peerNode.sendMessage(currentSession, content);
             addMessageToSession(currentSession, "Me", content, true);
+            historyManager.saveMessage(currentSession, content, true); // Save
         }
         messageField.setText("");
     }
@@ -298,6 +323,7 @@ public class MainFrame extends JFrame {
                 String content = parts[1];
 
                 addMessageToSession(sender, sender, content, false);
+                historyManager.saveMessage(sender, content, false); // Save incoming
 
                 // If not current session, maybe notification? (TODO)
             } else {
