@@ -81,22 +81,12 @@ public class MainFrame extends JFrame {
         peerList.setBackground(new Color(0, 0, 0, 0));
         peerList.setForeground(Theme.TEXT_PRIMARY);
         peerList.setFont(Theme.FONT_REGULAR);
-        peerList.setCellRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
-                    boolean cellHasFocus) {
-                JLabel c = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                c.setBorder(new EmptyBorder(10, 15, 10, 15));
-                c.setOpaque(isSelected);
-                if (isSelected) {
-                    c.setBackground(Theme.ACCENT);
-                    c.setForeground(Color.WHITE);
-                } else {
-                    c.setForeground(Theme.TEXT_PRIMARY);
-                }
-                return c;
-            }
+        
+        // Use Custom PeerCard Renderer for Glass Effect
+        peerList.setCellRenderer((list, value, index, isSelected, cellHasFocus) -> {
+            return new PeerCard(value, isSelected, index);
         });
+        peerList.setOpaque(false);
 
         peerList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {

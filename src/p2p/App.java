@@ -13,7 +13,8 @@ public class App {
     public static void main(String[] args) {
         // Set Look and Feel
         try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            // Force standard rendering to avoid Linux GTK theme overrides (Black Text Field fix)
+            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
         } catch (Exception e) {
         }
 

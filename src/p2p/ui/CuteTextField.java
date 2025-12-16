@@ -7,10 +7,11 @@ import java.awt.*;
 public class CuteTextField extends JTextField {
     public CuteTextField() {
         setOpaque(false); // We paint background manually
-        setForeground(Theme.TEXT_PRIMARY);
+        setBackground(new Color(0, 0, 0, 0)); 
+        setForeground(Color.WHITE); // White text on dark bg
         setFont(Theme.FONT_REGULAR);
-        setBorder(new EmptyBorder(10, 15, 10, 15)); // Padding
-        setCaretColor(Theme.ACCENT);
+        setBorder(new EmptyBorder(10, 20, 10, 20)); // More padding for pill shape
+        setCaretColor(Theme.GRAD_CYAN_START); // Cyan blinking cursor
     }
 
     @Override
@@ -18,13 +19,28 @@ public class CuteTextField extends JTextField {
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // Background
-        g2.setColor(Color.WHITE); // Or Theme.PANEL_BG
-        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30); // Very Rounded
+        int w = getWidth();
+        int h = getHeight();
+        int radius = h; // Full pill shape
 
-        // Border (Optional, maybe specific border color)
-        g2.setColor(Theme.ACCENT_TRANSPARENT);
-        g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 30, 30);
+        // 1. Bottom Glow (Cyan)
+        g2.setColor(new Color(0, 229, 255, 100)); // Cyan with alpha
+        // Draw a blurred oval at the bottom center
+        g2.fillOval(20, h - 10, w - 40, 15);
+        
+        // 2. Main Background (Dark Grey)
+        g2.setColor(new Color(40, 44, 52)); // Dark Grey like reference
+        g2.fillRoundRect(2, 2, w - 4, h - 8, radius, radius);
+
+        // 3. Inner Shadow / Border (Emboss effect)
+        g2.setStroke(new BasicStroke(3f));
+        g2.setColor(new Color(60, 64, 72)); // Lighter grey for border
+        g2.drawRoundRect(3, 3, w - 6, h - 10, radius, radius);
+
+        // 4. Highlight (Top rim)
+        g2.setStroke(new BasicStroke(1f));
+        g2.setColor(new Color(255, 255, 255, 50));
+        g2.drawRoundRect(4, 4, w - 8, h - 12, radius, radius);
 
         g2.dispose();
 
